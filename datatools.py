@@ -1,0 +1,69 @@
+from distutils.version import LooseVersion
+
+import dxdata
+import dxpy
+
+
+class Participant:
+    def __init__(self):
+        self.participant = self.get_participant_dataset()
+
+    @staticmethod
+    def get_participant_dataset():
+        """
+        get participant dataset from dispensed dataset
+        :return: participant dataset
+        """
+        # get dispensed dataset id
+        dispensed_dataset = dxpy.find_one_data_object(typename="Dataset",
+                                                      name="app*.dataset",
+                                                      folder="/",
+                                                      name_mode="glob")
+        dispensed_dataset_id = dispensed_dataset["id"]
+
+        # get dataset participant from dispensed dataset
+        dataset = dxdata.load_dataset(id=dispensed_dataset_id)
+        participant = dataset["participant"]
+
+        return participant
+
+    def field_by_id(self, field_id):
+        """
+        get field title & name by field id
+        :param field_id: UKB showcase field id
+        :return: field title & name
+        """
+        # get field
+        field_id = str(field_id)
+        fields = self.participant.find_fields(name_regex=r'^p{}(_i\d+)?(_a\d+)?$'.format(field_id))
+        fields = sorted(fields, key=lambda f: LooseVersion(f.name))
+        return {f.title: f.name for f in fields}
+
+    def field_by_keyword(self, keyword):
+        """
+        get field title & names by keyword
+        :param keyword: keyword of interest
+        :return: field titles & names
+        """
+        # get field
+        fields = list(self.participant.find_fields(lambda f: keyword.lower() in f.title.lower()))
+        fields = sorted(fields, key=lambda f: LooseVersion(f.name))
+
+        return {f.title: f.name for f in fields}
+
+    def get_data(self, field_name_dict, eid_list=None):
+        """
+        get covariates by eid & field names
+        :param eid_list: eid of participants of interest
+        :param field_name_dict: dict of field names and their description, e.g., {<description>:<field name>}
+        :return: return spark df of selected participants data
+        """
+        # get participant covariates
+        spark_df = self.participant.retrieve_fields(names=list(field_name_dict.values()), engine=dxdata.connect())
+        if eid_list:
+            final_df = spark_df.filter(spark_df["eid"].isin(eid_list))
+        else:
+            final_df = spark_df
+        final_df = final_df.toDF(*list(field_name_dict.keys()))
+
+        return final_df
