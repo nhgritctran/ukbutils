@@ -1,4 +1,4 @@
-# ukbutils - Collection of tools for working on UK Biobank RAP.
+# ukbutils - Collection of tools for working on UK Biobank RAP
 
 ## Description
 This collection of tools are wrappers for dxpy and dxdata to work on UK BioBank Research Analysis Platform. This was developed and tested for Jupyter Notebook interface on UKB RAP.
