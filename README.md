@@ -18,5 +18,4 @@ These tools should work with preinstalled libraries on UKB RAP such as dxpy, dxd
 
 ## Resources
 https://documentation.dnanexus.com
-
 http://autodoc.dnanexus.com/bindings/python/current/
