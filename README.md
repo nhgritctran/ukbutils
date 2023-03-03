@@ -1,7 +1,7 @@
 # ukbutils - Collection of tools for working on UK Biobank RAP
 
 ## Description
-This collection of tools are wrappers for dxpy and dxdata to work on UK BioBank Research Analysis Platform. This was developed and tested for Jupyter Notebook interface on UKB RAP. 
+This collection of tools were developed to make it easier to work on UKB RAP.
 
 ## Setup
 Clone repository in Jupyter Notebook instance using:
@@ -10,7 +10,11 @@ Clone repository in Jupyter Notebook instance using:
 ```
 Simply import the desired tool afterwards, for example:
 ```angular2html
-import datatools
+from ukbutils import datatools
+```
+or
+```angular2html
+from ukbutils.datatools import Participant, Database
 ```
 
 ## Dependencies
