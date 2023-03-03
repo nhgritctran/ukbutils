@@ -2,6 +2,7 @@ from distutils.version import LooseVersion
 
 import dxdata
 import dxpy
+import pyspark
 
 
 class Participant:
@@ -67,3 +68,44 @@ class Participant:
         final_df = final_df.toDF(*list(field_name_dict.keys()))
 
         return final_df
+
+
+class Database:
+
+    def __init__(self):
+        self.sc = pyspark.SparkContext()
+        self.spark = pyspark.sql.SparkSession(self.sc)
+        self.spark.sql("USE " + self.get_database())
+
+    @staticmethod
+    def get_database():
+        """
+        get dispensed database for querying
+        :return: dispensed database
+        """
+        # get dispensed dataset id
+        dispensed_database = dxpy.find_one_data_object(classname="database",
+                                                       name="app*", folder="/",
+                                                       name_mode="glob",
+                                                       describe=True)
+        dispensed_database_name = dispensed_database["describe"]["name"]
+
+        return dispensed_database_name
+
+    def find_table_by_keyword(self, keyword):
+        """
+        :param keyword: search keyword
+        :return: spark dataframe contain tables having keyword in their names
+        """
+        tables = self.get_query("SHOW TABLES")
+        table_df = tables.filter(tables["tableName"].contains(str(keyword).lower())).show(truncate=False)
+
+        return table_df
+
+    def get_query(self, query):
+        """
+        get data by SQL query
+        :param query: SQL query
+        :return: spark dataframe
+        """
+        return self.spark.sql(query)
