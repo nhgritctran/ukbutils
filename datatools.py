@@ -98,7 +98,7 @@ class Database:
         :return: spark dataframe contain tables having keyword in their names
         """
         tables = self.get_query("SHOW TABLES")
-        table_df = tables.filter(tables["tableName"].contains(str(keyword).lower())).show(truncate=False)
+        table_df = tables.filter(tables["tableName"].contains(str(keyword).lower()))
 
         return table_df
 
