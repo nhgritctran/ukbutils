@@ -38,6 +38,7 @@ class Participant:
         field_id = str(field_id)
         fields = self.participant.find_fields(name_regex=r'^p{}(_i\d+)?(_a\d+)?$'.format(field_id))
         fields = sorted(fields, key=lambda f: LooseVersion(f.name))
+
         return {f.title: f.name for f in fields}
 
     def field_by_keyword(self, keyword):
