@@ -92,15 +92,31 @@ class Database:
 
         return dispensed_database_name
 
-    def find_table_by_keyword(self, keyword):
+    def table_names_by_keyword(self, keyword):
         """
         :param keyword: search keyword
         :return: spark dataframe contain tables having keyword in their names
         """
         tables = self.get_query("SHOW TABLES")
         table_df = tables.filter(tables["tableName"].contains(str(keyword).lower()))
+        table_names = [row[0] for row in table_df.select("tableName").collect()]
 
-        return table_df
+        return table_names
+
+    def get_table_by_name(self, table_name):
+        """
+        :param table_name: exact name of table
+        :return: spark dataframe
+        """
+        query = f"""
+        SELECT
+            *
+        FROM
+            {table_name}
+        """
+        table = self.get_query(query)
+
+        return table
 
     def get_query(self, query):
         """
