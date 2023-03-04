@@ -1,7 +1,7 @@
 # ukbutils - Collection of tools for working on UK Biobank RAP
 
 ## Description
-This collection of tools are wrappers for dxpy and dxdata to work on UK BioBank Research Analysis Platform. This was developed and tested for Jupyter Notebook interface on UKB RAP. 
+This collection of tools are wrappers for dxpy and dxdata to work on UK BioBank Research Analysis Platform. This was developed for and tested on Jupyter Notebook interface on UKB RAP. 
 
 ## Setup
 Clone repository in Jupyter Notebook instance using:
@@ -18,4 +18,5 @@ These tools should work with preinstalled libraries on UKB RAP such as dxpy, dxd
 
 ## Resources
 https://documentation.dnanexus.com
+
 http://autodoc.dnanexus.com/bindings/python/current/
