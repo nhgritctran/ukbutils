@@ -3,11 +3,13 @@ from distutils.version import LooseVersion
 import dxdata
 import dxpy
 import pyspark
+import pyspark.sql.functions as fx
 
 
 class Participant:
     def __init__(self):
         self.participant = self.get_participant_dataset()
+        self.db = Database()
 
     @staticmethod
     def get_participant_dataset():
@@ -68,6 +70,17 @@ class Participant:
             final_df = spark_df
         final_df = final_df.toDF(*list(field_name_dict.keys()))
 
+        # get year of last gp event
+        year_of_last_event = self.db.get_year_of_last_event_data()
+
+        # generate age_at_last_event column
+        final_df = final_df.join(year_of_last_event, final_df["person_id"] == year_of_last_event["eid"], "left")
+        final_df = final_df.withColumn("age_at_last_event",
+                                           final_df["year_of_last_event"] - final_df["year_of_birth"])
+        # keep relevant columns
+        cols = list(field_name_dict.keys()) + ["age_at_last_event"]
+        final_df = final_df.select(*cols)
+
         return final_df
 
 
@@ -126,3 +139,22 @@ class Database:
         :return: spark dataframe
         """
         return self.spark.sql(query)
+
+    def get_year_of_last_event_data(self):
+        """
+
+        :return:
+        """
+
+        # query to select gp_clinical table
+        query = f"""
+        SELECT
+            *
+        FROM
+            gp_clinical
+        """
+        gp_clinical = self.get_query(query)
+        year_of_last_gp_event = gp_clinical.groupby("eid").agg(fx.max(fx.year("event_dt")))
+        year_of_last_gp_event = year_of_last_gp_event.toDF(*["eid", "year_of_last_event"])
+
+        return year_of_last_gp_event
