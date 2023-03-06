@@ -146,14 +146,7 @@ class Database:
         :return: spark df contain year of last event data for all participants
         """
 
-        # query to select gp_clinical table
-        query = f"""
-        SELECT
-            *
-        FROM
-            gp_clinical
-        """
-        gp_clinical = self.get_query(query)
+        gp_clinical = self.get_table_by_name("gp_clinical")
         year_of_last_gp_event = gp_clinical.groupby("eid").agg(fx.max(fx.year("event_dt")))
         year_of_last_gp_event = year_of_last_gp_event.toDF(*["eid", "year_of_last_event"])
 
