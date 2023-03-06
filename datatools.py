@@ -141,8 +141,7 @@ class Database:
 
     def get_year_of_last_event_data(self):
         """
-
-        :return:
+        :return: spark df contain year of last event data for all participants
         """
 
         # query to select gp_clinical table
