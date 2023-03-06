@@ -9,7 +9,6 @@ import pyspark.sql.functions as fx
 class Participant:
     def __init__(self):
         self.participant = self.get_participant_dataset()
-        self.db = Database()
 
     @staticmethod
     def get_participant_dataset():
@@ -55,11 +54,13 @@ class Participant:
 
         return {f.title: f.name for f in fields}
 
-    def get_data(self, field_name_dict, eid_list=None):
+    def get_data(self, field_name_dict, eid_list=None, year_of_last_event_data=None):
         """
         get covariates by eid & field names
         :param eid_list: eid of participants of interest
         :param field_name_dict: dict of field names and their description, e.g., {<description>:<field name>}
+        :param year_of_last_event_data: spark df contain year of last event for all participants;
+                                        should be generated using method get_year_of_last_event_data from class Database
         :return: return spark df of selected participants data
         """
         # get participant covariates
@@ -70,13 +71,11 @@ class Participant:
             final_df = spark_df
         final_df = final_df.toDF(*list(field_name_dict.keys()))
 
-        # get year of last gp event
-        year_of_last_event = self.db.get_year_of_last_event_data()
-
         # generate age_at_last_event column
-        final_df = final_df.join(year_of_last_event, final_df["person_id"] == year_of_last_event["eid"], "left")
+        final_df = final_df.join(year_of_last_event_data,
+                                 final_df["person_id"] == year_of_last_event_data["eid"], "left")
         final_df = final_df.withColumn("age_at_last_event",
-                                           final_df["year_of_last_event"] - final_df["year_of_birth"])
+                                       final_df["year_of_last_event"] - final_df["year_of_birth"])
         # keep relevant columns
         cols = list(field_name_dict.keys()) + ["age_at_last_event"]
         final_df = final_df.select(*cols)
