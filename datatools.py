@@ -65,20 +65,22 @@ class Participant:
         """
         # get participant covariates
         spark_df = self.participant.retrieve_fields(names=list(field_name_dict.values()), engine=dxdata.connect())
+
         if eid_list:
             final_df = spark_df.filter(spark_df["eid"].isin(eid_list))
         else:
             final_df = spark_df
         final_df = final_df.toDF(*list(field_name_dict.keys()))
 
-        # generate age_at_last_event column
-        final_df = final_df.join(year_of_last_event_data,
-                                 final_df["person_id"] == year_of_last_event_data["eid"], "left")
-        final_df = final_df.withColumn("age_at_last_event",
-                                       final_df["year_of_last_event"] - final_df["year_of_birth"])
-        # keep relevant columns
-        cols = list(field_name_dict.keys()) + ["age_at_last_event"]
-        final_df = final_df.select(*cols)
+        if year_of_last_event_data:
+            # generate age_at_last_event column
+            final_df = final_df.join(year_of_last_event_data,
+                                     final_df["person_id"] == year_of_last_event_data["eid"], "left")
+            final_df = final_df.withColumn("age_at_last_event",
+                                           final_df["year_of_last_event"] - final_df["year_of_birth"])
+            # keep relevant columns
+            cols = list(field_name_dict.keys()) + ["age_at_last_event"]
+            final_df = final_df.select(*cols)
 
         return final_df
 
