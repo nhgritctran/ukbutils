@@ -87,10 +87,14 @@ class Participant:
 
 class Database:
 
-    def __init__(self):
+    def __init__(self, database_name=None):
         self.sc = pyspark.SparkContext()
         self.spark = pyspark.sql.SparkSession(self.sc)
-        self.spark.sql("USE " + self.get_database())
+
+        if database_name is not None:
+            self.spark.sql("USE " + database_name)
+        else:
+            self.spark.sql("USE " + self.get_database())
 
     @staticmethod
     def get_database():
